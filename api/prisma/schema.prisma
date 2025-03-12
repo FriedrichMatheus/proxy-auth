@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  username        String   @unique
+  password        String
+  email           String   @unique
+  updated_at      DateTime @updatedAt 
+  created_at      DateTime @default(now())
+
+  planHistory     PlanHistory[]
+}
+
+model PlanHistory {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  planId          Int
+  data_used       Decimal  @default(0.0)   
+  data_limit      Decimal  @default(0.0)   
+  createdAt       DateTime @default(now())
+
+  plan            Plan?    @relation(fields: [planId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
+  paymentId       String?
+  status          String?  @default("pending") 
+
+  @@map("history")
+}
+
+model Plan {
+  id              Int @id @default(autoincrement())
+  description     String
+  durationInHours Int
+  price           Float
+  coupon          String @unique 
+  name            String
+  planHistory     PlanHistory[]
+
+  @@map("plan")
+}
+
